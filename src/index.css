@@ -86,3 +86,13 @@ main {
   padding-bottom: 2rem;
   background: #f4f4f4; /* slightly darker than pure white */
 }
+
+.artist-card img {
+  width: 100%;        /* makes the image fill the card width */
+  max-width: 200px;   /* optional: cap the max width */
+  height: auto;       /* keeps aspect ratio */
+  border-radius: 10px; /* optional: rounded corners */
+  object-fit: cover;  /* crops image nicely if needed */
+  margin: 0 auto;     /* center inside the card */
+  display: block;
+}
