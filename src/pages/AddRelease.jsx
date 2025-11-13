@@ -1,76 +1,115 @@
 // src/pages/AddRelease.jsx
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabase/client";
-import { useSession } from "@supabase/auth-helpers-react";
 
 export default function AddRelease() {
-  const session = useSession();
+  const navigate = useNavigate();
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [artistId, setArtistId] = useState("");
   const [coverFile, setCoverFile] = useState(null);
   const [audioFile, setAudioFile] = useState(null);
   const [artists, setArtists] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchArtists = async () => {
-      const { data } = await supabase.from("artists").select("id,name");
-      setArtists(data || []);
+      const { data, error } = await supabase.from("artists").select("*");
+      if (error) console.error(error);
+      else setArtists(data);
     };
     fetchArtists();
   }, []);
 
-  if (!session) return <p style={{ textAlign: "center", marginTop: "2rem" }}>Please log in to add releases.</p>;
+  const handleCoverChange = (e) => setCoverFile(e.target.files[0]);
+  const handleAudioChange = (e) => setAudioFile(e.target.files[0]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!artistId) return alert("Select an artist");
+    if (!title || !artistId) return alert("Title and Artist are required");
+    setLoading(true);
 
+    // Upload cover image
     let coverUrl = null;
     if (coverFile) {
-      const { data, error } = await supabase.storage
+      const { error: coverError } = await supabase.storage
         .from("release-covers")
-        .upload(`covers/${Date.now()}_${coverFile.name}`, coverFile);
-      if (error) return alert(error.message);
-      coverUrl = data.path;
+        .upload(`public/${coverFile.name}`, coverFile, { upsert: true });
+      if (coverError) {
+        setLoading(false);
+        return alert("Error uploading cover image: " + coverError.message);
+      }
+      coverUrl = `https://YOUR_PROJECT_ID.supabase.co/storage/v1/object/public/release-covers/public/${coverFile.name}`;
     }
 
-    const { data: release, error: releaseError } = await supabase
-      .from("releases")
-      .insert([{ title, artist_id: artistId, cover_image: coverUrl }])
-      .select()
-      .single();
-    if (releaseError) return alert(releaseError.message);
-
+    // Upload audio file
+    let audioUrl = null;
     if (audioFile) {
-      const { data, error } = await supabase.storage
+      const { error: audioError } = await supabase.storage
         .from("audio-files")
-        .upload(`tracks/${Date.now()}_${audioFile.name}`, audioFile);
-      if (error) return alert(error.message);
-
-      await supabase.from("tracks").insert([
-        { release_id: release.id, title: audioFile.name, audio_url: data.path }
-      ]);
+        .upload(`public/${audioFile.name}`, audioFile, { upsert: true });
+      if (audioError) {
+        setLoading(false);
+        return alert("Error uploading audio file: " + audioError.message);
+      }
+      audioUrl = `https://YOUR_PROJECT_ID.supabase.co/storage/v1/object/public/audio-files/public/${audioFile.name}`;
     }
 
-    alert("Release added successfully!");
-    setTitle("");
-    setArtistId("");
-    setCoverFile(null);
-    setAudioFile(null);
+    // Insert into releases table
+    const { data, error } = await supabase.from("releases").insert({
+      title,
+      description,
+      artist_id: artistId,
+      cover_image: coverUrl,
+      audio_url: audioUrl,
+    });
+
+    setLoading(false);
+    if (error) return alert("Error adding release: " + error.message);
+    alert("Release added!");
+    navigate("/releases");
   };
 
   return (
-    <div style={{ maxWidth: "600px", margin: "2rem auto", padding: "0 1rem" }}>
+    <div style={{ maxWidth: "600px", margin: "2rem auto", padding: "1rem" }}>
       <h2>Add Release</h2>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Release Title" required />
-        <select value={artistId} onChange={(e) => setArtistId(e.target.value)} required>
-          <option value="">Select Artist</option>
-          {artists.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-        </select>
-        <input type="file" onChange={(e) => setCoverFile(e.target.files[0])} />
-        <input type="file" onChange={(e) => setAudioFile(e.target.files[0])} />
-        <button type="submit" className="primary-btn">Add Release</button>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Title</label>
+          <input value={title} onChange={(e) => setTitle(e.target.value)} required />
+        </div>
+
+        <div>
+          <label>Artist</label>
+          <select value={artistId} onChange={(e) => setArtistId(e.target.value)} required>
+            <option value="">Select an artist</option>
+            {artists.map((artist) => (
+              <option key={artist.id} value={artist.id}>
+                {artist.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label>Description</label>
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
+        </div>
+
+        <div>
+          <label>Cover Image</label>
+          <input type="file" accept="image/*" onChange={handleCoverChange} />
+        </div>
+
+        <div>
+          <label>Audio File</label>
+          <input type="file" accept="audio/*" onChange={handleAudioChange} />
+        </div>
+
+        <button type="submit" disabled={loading}>
+          {loading ? "Adding..." : "Add Release"}
+        </button>
       </form>
     </div>
   );

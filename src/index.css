@@ -96,3 +96,10 @@ main {
   margin: 0 auto;     /* center inside the card */
   display: block;
 }
+
+.release-card img {
+  width: 200px;
+  max-height: 200px; /* Adjust as needed */
+  object-fit: cover;
+  border-radius: 8px;
+}
