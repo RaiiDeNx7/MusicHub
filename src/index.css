@@ -236,3 +236,16 @@ audio {
   object-fit: cover;
   border-radius: 10px;
 }
+
+.track, .release-artist, .release-detail-header, h3 {
+  text-align: center;
+}
+
+.release-detail-header {
+  padding-top: 50px;
+  padding-bottom: 50px;
+}
+
+.track {
+  padding-bottom: 50px;
+}

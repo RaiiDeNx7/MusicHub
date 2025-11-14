@@ -10,20 +10,32 @@ export default function ArtistProfile() {
 
   useEffect(() => {
     async function fetchData() {
+      // Fetch artist info
       const { data: artistData } = await supabase
         .from("artists")
         .select("*")
         .eq("id", id)
         .single();
 
-      const { data: releaseData } = await supabase
+      // Fetch releases WITH joined artist details
+      const { data: releaseData, error } = await supabase
         .from("releases")
-        .select("*")
+        .select(`
+          *,
+          artists:artist_id (
+            id,
+            name,
+            profile_image
+          )
+        `)
         .eq("artist_id", id);
+
+      if (error) console.error("Release fetch error:", error);
 
       setArtist(artistData);
       setReleases(releaseData);
     }
+
     fetchData();
   }, [id]);
 

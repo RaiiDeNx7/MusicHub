@@ -1,42 +1,45 @@
-// src/pages/Releases.jsx
 import React, { useEffect, useState } from "react";
-import { useSession } from "@supabase/auth-helpers-react";
-import { Link } from "react-router-dom";
 import { supabase } from "../supabase/client";
 import ReleaseCard from "../components/ReleaseCard";
 
-export default function Releases() {
-  const session = useSession();
+export default function Releases({ limit }) {
   const [releases, setReleases] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchReleases = async () => {
-      const { data, error } = await supabase.from("releases").select("*");
-      if (error) console.error(error);
-      else setReleases(data);
-    };
+    async function fetchReleases() {
+      const { data, error } = await supabase
+        .from("releases")
+        .select(`
+          *,
+          artists:artist_id (
+            id,
+            name
+          )
+        `)
+        .order("created_at", { ascending: false })
+        .limit(limit || 100);
+
+      if (error) {
+        console.error("Error fetching releases:", error);
+      } else {
+        setReleases(data);
+      }
+
+      setLoading(false);
+    }
+
     fetchReleases();
-  }, []);
+  }, [limit]);
+
+  if (loading) return <p>Loading releases...</p>;
+  if (releases.length === 0) return <p>No releases found.</p>;
 
   return (
-    <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "2rem", width: "100%" }}>
-      {session && (
-        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }}>
-          <Link to="/add-release">
-            <button className="primary-btn">Add Release</button>
-          </Link>
-        </div>
-      )}
-
-      {releases.length > 0 ? (
-        <div className="release-grid">
-          {releases.map((release) => (
-            <ReleaseCard key={release.id} release={release} />
-          ))}
-        </div>
-      ) : (
-        <p>No releases found.</p>
-      )}
+    <div className="release-grid">
+      {releases.map((release) => (
+        <ReleaseCard key={release.id} release={release} />
+      ))}
     </div>
   );
 }

@@ -1,45 +1,55 @@
-import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { supabase } from '../supabase/client'
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { supabase } from "../supabase/client";
+import AudioPlayer from "../components/AudioPlayer";
 
 export default function ReleaseDetail() {
-  const { id } = useParams()
-  const [release, setRelease] = useState(null)
+  const { id } = useParams();
+  const [release, setRelease] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const { data, error } = await supabase
-        .from('releases')
-        .select('*')
-        .eq('id', id)
-        .single()
+    async function fetchData() {
+      const { data } = await supabase
+        .from("releases")
+        .select(`
+          *,
+          artists (
+            id,
+            name
+          )
+        `)
+        .eq("id", id)
+        .single();
 
-      if (!error) setRelease(data)
+      setRelease(data);
     }
+    fetchData();
+  }, [id]);
 
-    fetchData()
-  }, [id])
-
-  if (!release) return <p>Loading...</p>
+  if (!release) return <p>Loading...</p>;
 
   return (
-    <div className="page">
-      <h2>{release.title}</h2>
-      <img src={release.cover_image} alt={release.title} className="release-banner" />
+    <div className="release-detail-page">
+      <div className="release-detail-header">
+        <img
+          src={release.cover_image}
+          alt={release.title}
+          className="release-banner"
+        />
 
-      <p>{release.description}</p>
+        <div className="release-detail-info">
+          <h2>{release.title}</h2>
+          <p className="release-artist">{release.artists?.name}</p>
+          <p>{release.description}</p>
+        </div>
+      </div>
 
       <h3>Listen</h3>
-
       {release.audio_url ? (
-        <audio
-          controls
-          src={release.audio_url}
-          style={{ width: "100%", maxWidth: "400px" }}
-        />
+        <AudioPlayer track={{ audio_url: release.audio_url }} />
       ) : (
-        <p>No audio available for this release.</p>
+        <p>No audio available.</p>
       )}
     </div>
-  )
+  );
 }
