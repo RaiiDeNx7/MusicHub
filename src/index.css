@@ -101,3 +101,138 @@ main {
   object-fit: cover;
   border-radius: 8px; /* optional */
 }
+
+/* Page container */
+.page {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  font-family: "Inter", sans-serif;
+}
+
+/* Release title */
+.page h2 {
+  font-size: 2.4rem;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Release cover image */
+.release-banner {
+  width: 100%;
+  max-width: 420px;
+  height: 420px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin: 0 auto;
+  display: block;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+}
+
+/* Description text */
+.page p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  max-width: 650px;
+  margin: 0 auto;
+  text-align: center;
+  color: #444;
+}
+
+/* Tracklist header */
+.page h3 {
+  font-size: 1.6rem;
+  margin-top: 1rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Audio player styling */
+audio {
+  width: 100%;
+  max-width: 500px;
+  margin: 0.5rem auto;
+  display: block;
+}
+
+/* Optional: card-style section for audio */
+.audio-section {
+  padding: 1.5rem 1rem;
+  background: #fafafa;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Page container */
+.artist-page {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  font-family: "Inter", sans-serif;
+}
+
+/* Header: profile picture + info */
+.artist-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Profile image */
+.artist-photo {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+}
+
+/* Artist info */
+.artist-info {
+  max-width: 500px;
+  text-align: center;
+}
+
+.artist-info h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.artist-bio {
+  font-size: 1.1rem;
+  color: #444;
+  line-height: 1.6;
+}
+
+/* Section title */
+.section-title {
+  font-size: 1.5rem;
+  margin-top: 1rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Release grid */
+.release-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.5rem;
+}
+
+.release-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1;  /* perfect square */
+  object-fit: cover;
+  border-radius: 10px;
+}

@@ -30,11 +30,23 @@ export default function ArtistProfile() {
   if (!artist) return <p>Loading...</p>;
 
   return (
-    <div>
-      <h2>{artist.name}</h2>
-      <p>{artist.bio}</p>
-      <h3>Releases</h3>
-      <div className="grid">
+    <div className="artist-page">
+      <div className="artist-header">
+        <img
+          src={artist.profile_image}
+          alt={artist.name}
+          className="artist-photo"
+        />
+
+        <div className="artist-info">
+          <h2>{artist.name}</h2>
+          <p className="artist-bio">{artist.bio}</p>
+        </div>
+      </div>
+
+      <h3 className="section-title">Releases</h3>
+
+      <div className="release-grid">
         {releases.map((release) => (
           <ReleaseCard key={release.id} release={release} />
         ))}
