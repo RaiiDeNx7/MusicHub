@@ -5,7 +5,6 @@ export default function ArtistCard({ artist }) {
     <div className="artist-card">
       <img src={artist.profile_image} alt={artist.name} />
       <h3>{artist.name}</h3>
-      <p>{artist.bio}</p> {/* use bio instead of genre */}
       <Link to={`/artist/${artist.id}`}>View Profile</Link>
     </div>
   );

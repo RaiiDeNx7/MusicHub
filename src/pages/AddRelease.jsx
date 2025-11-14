@@ -1,10 +1,10 @@
-// src/pages/AddRelease.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabase/client";
 
 export default function AddRelease() {
   const navigate = useNavigate();
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [artistId, setArtistId] = useState("");
@@ -13,6 +13,7 @@ export default function AddRelease() {
   const [artists, setArtists] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Fetch artists list
   useEffect(() => {
     const fetchArtists = async () => {
       const { data, error } = await supabase.from("artists").select("*");
@@ -22,42 +23,72 @@ export default function AddRelease() {
     fetchArtists();
   }, []);
 
-  const handleCoverChange = (e) => setCoverFile(e.target.files[0]);
-  const handleAudioChange = (e) => setAudioFile(e.target.files[0]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title || !artistId) return alert("Title and Artist are required");
+
     setLoading(true);
 
-    // Upload cover image
+    // Make sure user is authenticated
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) {
+      setLoading(false);
+      return alert("You must be logged in to upload files.");
+    }
+
     let coverUrl = null;
+    let audioUrl = null;
+
+    // ---------------------------
+    // Upload Cover Image
+    // ---------------------------
     if (coverFile) {
+      const filePath = `covers/${Date.now()}-${coverFile.name}`;
+
       const { error: coverError } = await supabase.storage
         .from("release-covers")
-        .upload(`public/${coverFile.name}`, coverFile, { upsert: true });
+        .upload(filePath, coverFile, { upsert: true });
+
       if (coverError) {
         setLoading(false);
         return alert("Error uploading cover image: " + coverError.message);
       }
-      coverUrl = `https://YOUR_PROJECT_ID.supabase.co/storage/v1/object/public/release-covers/public/${coverFile.name}`;
+
+      // Generate public URL
+      const { data: urlData } = supabase.storage
+        .from("release-covers")
+        .getPublicUrl(filePath);
+
+      coverUrl = urlData.publicUrl;
     }
 
-    // Upload audio file
-    let audioUrl = null;
+    // ---------------------------
+    // Upload Audio File
+    // ---------------------------
     if (audioFile) {
+      const filePath = `audio/${Date.now()}-${audioFile.name}`;
+
       const { error: audioError } = await supabase.storage
         .from("audio-files")
-        .upload(`public/${audioFile.name}`, audioFile, { upsert: true });
+        .upload(filePath, audioFile, { upsert: true });
+
       if (audioError) {
         setLoading(false);
         return alert("Error uploading audio file: " + audioError.message);
       }
-      audioUrl = `https://YOUR_PROJECT_ID.supabase.co/storage/v1/object/public/audio-files/public/${audioFile.name}`;
+
+      // Generate public URL
+      const { data: urlData } = supabase.storage
+        .from("audio-files")
+        .getPublicUrl(filePath);
+
+      audioUrl = urlData.publicUrl;
     }
 
-    // Insert into releases table
-    const { data, error } = await supabase.from("releases").insert({
+    // ---------------------------
+    // Insert Release into DB
+    // ---------------------------
+    const { error: insertError } = await supabase.from("releases").insert({
       title,
       description,
       artist_id: artistId,
@@ -66,27 +97,40 @@ export default function AddRelease() {
     });
 
     setLoading(false);
-    if (error) return alert("Error adding release: " + error.message);
-    alert("Release added!");
+
+    if (insertError) {
+      return alert("Error adding release: " + insertError.message);
+    }
+
+    alert("Release added successfully!");
     navigate("/releases");
   };
 
   return (
-    <div style={{ maxWidth: "600px", margin: "2rem auto", padding: "1rem" }}>
+    <div style={{ maxWidth: "600px", margin: "2rem auto" }}>
       <h2>Add Release</h2>
+
       <form onSubmit={handleSubmit}>
         <div>
           <label>Title</label>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} required />
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
         </div>
 
         <div>
           <label>Artist</label>
-          <select value={artistId} onChange={(e) => setArtistId(e.target.value)} required>
+          <select
+            value={artistId}
+            onChange={(e) => setArtistId(e.target.value)}
+            required
+          >
             <option value="">Select an artist</option>
-            {artists.map((artist) => (
-              <option key={artist.id} value={artist.id}>
-                {artist.name}
+            {artists.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name}
               </option>
             ))}
           </select>
@@ -94,17 +138,20 @@ export default function AddRelease() {
 
         <div>
           <label>Description</label>
-          <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
         </div>
 
         <div>
           <label>Cover Image</label>
-          <input type="file" accept="image/*" onChange={handleCoverChange} />
+          <input type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files[0])} />
         </div>
 
         <div>
           <label>Audio File</label>
-          <input type="file" accept="audio/*" onChange={handleAudioChange} />
+          <input type="file" accept="audio/*" onChange={(e) => setAudioFile(e.target.files[0])} />
         </div>
 
         <button type="submit" disabled={loading}>

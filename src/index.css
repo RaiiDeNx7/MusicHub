@@ -87,19 +87,17 @@ main {
   background: #f4f4f4; /* slightly darker than pure white */
 }
 
-.artist-card img {
-  width: 100%;        /* makes the image fill the card width */
-  max-width: 200px;   /* optional: cap the max width */
-  height: auto;       /* keeps aspect ratio */
-  border-radius: 10px; /* optional: rounded corners */
-  object-fit: cover;  /* crops image nicely if needed */
-  margin: 0 auto;     /* center inside the card */
-  display: block;
-}
 
 .release-card img {
   width: 200px;
   max-height: 200px; /* Adjust as needed */
   object-fit: cover;
   border-radius: 8px;
+}
+
+.artist-card img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px; /* optional */
 }
