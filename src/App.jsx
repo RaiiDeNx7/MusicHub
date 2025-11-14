@@ -11,6 +11,8 @@ import ReleaseDetail from './pages/ReleaseDetail'
 import Contact from './pages/Contact'
 import AddArtist from './pages/AddArtist'
 import AddRelease from './pages/AddRelease'
+import EditArtist from "./pages/EditArtist";
+import EditRelease from "./pages/EditRelease";
 
 
 export default function App() {
@@ -27,6 +29,9 @@ export default function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/add-artist" element={<AddArtist />} />
           <Route path="/add-release" element={<AddRelease />} />
+          <Route path="/artist/edit/:id" element={<EditArtist />} />
+          <Route path="/release/edit/:id" element={<EditRelease />} />
+
         </Routes>
       </main>
       <Footer />
