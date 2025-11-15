@@ -47,7 +47,9 @@ export default function ReleaseDetail() {
         />
 
         <div className="release-detail-info" style={{ textAlign: "center" }}>
-          <h2>{release.title}</h2>
+          <h2>
+            {release.title} {release.year && `(${release.year})`}
+          </h2>
           <p className="release-artist">{release.artists?.name}</p>
           <p>{release.description}</p>
 

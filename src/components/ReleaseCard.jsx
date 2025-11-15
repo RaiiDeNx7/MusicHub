@@ -10,7 +10,7 @@ export default function ReleaseCard({ release }) {
       />
 
       <div className="release-card-content">
-        <h4>{release.title}</h4>
+        <h4>{release.title} {release.year && `(${release.year})`}</h4>
 
         {/* Artist name from joined table */}
         {release.artists?.name && (

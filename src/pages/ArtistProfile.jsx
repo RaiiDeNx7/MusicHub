@@ -10,23 +10,28 @@ export default function ArtistProfile() {
   const [releases, setReleases] = useState([]);
 
   useEffect(() => {
-    async function fetchData() {
-      const { data: artistData } = await supabase
-        .from("artists")
-        .select("*")
-        .eq("id", id)
-        .single();
+  async function fetchData() {
+    // Fetch artist data
+    const { data: artistData } = await supabase
+      .from("artists")
+      .select("*")
+      .eq("id", id)
+      .single();
 
-      const { data: releaseData } = await supabase
-        .from("releases")
-        .select("*")
-        .eq("artist_id", id);
+    // Fetch releases sorted most recent first
+    const { data: releaseData } = await supabase
+      .from("releases")
+      .select("*")
+      .eq("artist_id", id)
+      .order("year", { ascending: false }) // sort by year descending
+      .order("created_at", { ascending: false }); // fallback to latest created if same year
 
-      setArtist(artistData);
-      setReleases(releaseData);
-    }
-    fetchData();
-  }, [id]);
+    setArtist(artistData);
+    setReleases(releaseData);
+  }
+  fetchData();
+}, [id]);
+
 
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this artist?")) return;

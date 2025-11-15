@@ -1,3 +1,4 @@
+// src/pages/EditRelease.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "../supabase/client";
@@ -8,6 +9,7 @@ export default function EditRelease() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [artistId, setArtistId] = useState("");
+  const [year, setYear] = useState(new Date().getFullYear());
   const [coverFile, setCoverFile] = useState(null);
   const [audioFile, setAudioFile] = useState(null);
   const [artists, setArtists] = useState([]);
@@ -28,6 +30,7 @@ export default function EditRelease() {
         setTitle(releaseData.title);
         setDescription(releaseData.description);
         setArtistId(releaseData.artist_id);
+        setYear(releaseData.year || new Date().getFullYear());
       }
     };
     fetchData();
@@ -70,6 +73,7 @@ export default function EditRelease() {
         title,
         description,
         artist_id: artistId,
+        year,
         ...(coverUrl && { cover_image: coverUrl }),
         ...(audioUrl && { audio_url: audioUrl }),
       })
@@ -87,7 +91,7 @@ export default function EditRelease() {
     const { error } = await supabase.from("releases").delete().eq("id", id);
     if (error) return alert("Error deleting release: " + error.message);
     alert("Release deleted!");
-    navigate("/");
+    navigate("/releases");
   };
 
   return (
@@ -107,6 +111,18 @@ export default function EditRelease() {
               <option key={artist.id} value={artist.id}>{artist.name}</option>
             ))}
           </select>
+        </div>
+
+        <div>
+          <label>Year</label>
+          <input
+            type="number"
+            value={year}
+            onChange={(e) => setYear(Number(e.target.value))}
+            required
+            min="1900"
+            max={new Date().getFullYear() + 1}
+          />
         </div>
 
         <div>
