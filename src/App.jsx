@@ -2,7 +2,7 @@ import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
-
+import AuthPage from "./pages/Auth";
 import Home from './pages/Home'
 import Artists from './pages/Artists'
 import ArtistProfile from './pages/ArtistProfile'
@@ -31,7 +31,7 @@ export default function App() {
           <Route path="/add-release" element={<AddRelease />} />
           <Route path="/artist/edit/:id" element={<EditArtist />} />
           <Route path="/release/edit/:id" element={<EditRelease />} />
-
+          <Route path="/auth" element={<AuthPage />} />
         </Routes>
       </main>
       <Footer />
